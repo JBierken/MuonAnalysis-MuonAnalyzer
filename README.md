@@ -13,7 +13,7 @@ $ cmsrel CMSSW_13_0_5_patch2
 $ cd CMSSW_13_0_5_patch2/src
 $ cmsenv
 $ git cms-init
-$ git clone https://gitlab.cern.ch/cms-muonPOG/muonanalysis-muonanalyzer.git MuonAnalysis/MuonAnalyzer -b 12_4_X
+$ git clone https://github.com/JBierken/MuonAnalysis-MuonAnalyzer.git MuonAnalysis/MuonAnalyzer -b 12_4_X
 $ scram b -j 8
 ```
 
@@ -24,7 +24,7 @@ $ cmsrel CMSSW_12_4_8
 $ cd CMSSW_12_4_8/src
 $ cmsenv
 $ git cms-init
-$ git clone https://gitlab.cern.ch/cms-muonPOG/muonanalysis-muonanalyzer.git MuonAnalysis/MuonAnalyzer -b 12_4_X
+$ git clone https://github.com/JBierken/MuonAnalysis-MuonAnalyzer.git MuonAnalysis/MuonAnalyzer -b 12_4_X
 $ scram b -j 8
 ```
 
