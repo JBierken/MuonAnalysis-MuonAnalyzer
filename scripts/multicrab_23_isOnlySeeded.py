@@ -43,7 +43,7 @@ def getOptions():
 
     parser.add_option('-w', '--workArea',
                       dest = 'workArea',
-                      default = 'CrabLogFiles_Run2023_AOD_isOnlySeeded',
+                      default= 'crab_standAloneMuons_23_isOnlySeeded',
                       # default = 'FinalJetscrab_AOD_Run2023_pTFromTracker_isOnlySeeded',
                       help = "work area directory. Default: 'crab'.",
                       metavar = 'WAD')
@@ -116,7 +116,7 @@ def getOptions():
 
     parser.add_option('-b', '--eraDB',
                       dest = 'eraDB',
-                      default = 'MuonAnalysis/MuonAnalyzer/data/samples/muon/Z/Run2023/database.json',
+                      default = '',
                       help = "Database file. default: data/samples/muon/Z/Run2018_UL/database.json",
                       metavar = 'ERA_DB_FILE')
 
@@ -215,8 +215,9 @@ def main():
         config.JobType.psetName = configFile
         config.JobType.numCores = numThreads
         config.JobType.allowUndistributedCMSSW = True
+        config.JobType.maxJobRuntimeMin = 2880  # Set the wall clock time limit (e.g., 48 hours = 2880 minutes)
         #config.JobType.maxMemoryMB = 4000
-        config.JobType.inputFiles = ['MuonAnalysis/MuonAnalyzer/test/lumiData.csv', 'MuonAnalysis/MuonAnalyzer/test/lumiMC.csv']
+        #config.JobType.inputFiles = ['MuonAnalysis/MuonAnalyzer/test/lumiData.csv', 'MuonAnalysis/MuonAnalyzer/test/lumiMC.csv']
         config.Data.publication = False
         config.Data.allowNonValidInputDataset = True # for validation samples
 
@@ -231,7 +232,7 @@ def main():
         elif storageSite == 'CERNBOX':
             # See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_send_CRAB_output_to_CERNBO
             config.Site.storageSite = 'T3_CH_CERNBOX'
-            config.Data.outLFNDirBase = '/store/user/%s/TnP_ntuples_Run2023_AOD_isOnlySeeded/%s/%s/%s/%s' % (getUsername(), particle, resonance, era, dataTier)
+            config.Data.outLFNDirBase = '/store/user/%s/TnP_ntuples/Tracker_only/%s/%s/%s/%s' % (getUsername(), particle, resonance, era, dataTier)
         elif storageSite == 'BARI':
             config.Site.storageSite = 'T2_IT_Bari'
             config.Data.outLFNDirBase = '/store/user/%s/TnP_ntuples/%s/%s/%s/%s' % (getUsername(), particle, resonance, era, dataTier)
@@ -334,7 +335,7 @@ def main():
                     'globalTag={}'.format(globalTag),
                     'numThreads={}'.format(numThreads),
                     'era={}'.format(era),
-                    'includeJets={}'.format(True),
+                    'includeJets={}'.format(False),
                     'fromCRAB={}'.format(True)
                     ]
 

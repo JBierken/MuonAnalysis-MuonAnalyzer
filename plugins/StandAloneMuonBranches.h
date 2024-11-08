@@ -65,6 +65,7 @@ inline void StandAloneFillEventInfo(NtupleContent &nt,
   SA_nt.genmuFSfromHP2_eta = nt.genmuFSfromHP2_eta;
   SA_nt.genmuFSfromHP2_phi = nt.genmuFSfromHP2_phi;
   SA_nt.genmuFSfromHP2_charge = nt.genmuFSfromHP2_charge;
+  //                    oaxDRProbeTrkDSA =  cms.double(0.4), // max DR for general track and dSA
   SA_nt.genMassFSfromHP = nt.genMassFSfromHP;
 
   for (unsigned int ihlt = 0; ihlt < HLTs.size(); ihlt++) {
@@ -153,7 +154,7 @@ inline void StandAloneFillProbeBranches(const MUON &SAmu,
       nt.probe_trkPhi = match_track.phi();
       nt.probe_trkCharge = match_track.charge();
       nt.probe_trkDxy = match_track.dxy();
-      nt.probe_trkDz = match_track.dz();
+      nt.probe_trkDz = match_track.vz();
       nt.probe_trkHits = match_track.numberOfValidHits();
       nt.probe_trkStripHits = match_track.hitPattern().numberOfValidStripHits();
       nt.probe_trkPixelHits = match_track.hitPattern().numberOfValidPixelHits();

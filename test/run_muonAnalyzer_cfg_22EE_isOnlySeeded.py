@@ -267,7 +267,7 @@ if options.isStandAlone:
         if options.resonance == 'Z':
             process = muonAnalysis_customizeStandAloneFullAOD_Z(process)
         else:
-            process = muonAnalysis_customizeFullAOD_JPsi(process) # No JPsi Standalone config set yet
+            process = muonAnalysis_customizeStandAloneFullAOD_JPsi(process)
         if not options.isMC:
             process.muon.jetCorrector = cms.InputTag(
                 "ak4PFCHSL1FastL2L3ResidualCorrector")
@@ -275,7 +275,7 @@ if options.isStandAlone:
         if options.resonance == 'Z':
             process = muonAnalysis_customizeStandAloneMiniAOD_Z(process)
         else:
-            process = muonAnalysis_customizeMiniAOD(process)  # No JPsi Standalone config set yet
+            process = muonAnalysis_customizeStandAloneMiniAOD_JPsi(process)
 
 else:
     if options.isFullAOD:
@@ -290,7 +290,7 @@ else:
         if options.resonance == 'Z':
             process = muonAnalysis_customizeMiniAOD_Z(process)
         else:
-            process = muonAnalysis_customizeMiniAOD(process)
+            process = muonAnalysis_customizeMiniAOD_JPsi(process)
 
 process.muon.isMC = options.isMC
 process.muon.includeJets = options.includeJets
@@ -344,23 +344,23 @@ from MuonAnalysis.MuonAnalyzer.selectorInfo_cff import getSelectorNamesAndBits
 selectorNames, selectorBits = getSelectorNamesAndBits(options.era, options.isFullAOD)
 process.muon.probeSelectorNames = cms.vstring(selectorNames)
 process.muon.probeSelectorBits = cms.vuint32(selectorBits)
-if not options.isMC:
-    process.LumiInfo = cms.EDProducer('LumiProducerFromBrilcalc',
-                                      lumiFile = cms.string("lumiData.csv"),
-                                      throwIfNotFound = cms.bool(False),
-                                      doBunchByBunch = cms.bool(False)
-                                      )
-else:
-    process.LumiInfo = cms.EDProducer('LumiProducerFromBrilcalc',
-                                      lumiFile = cms.string("lumiMC.csv"),
-                                      throwIfNotFound = cms.bool(False),
-                                      doBunchByBunch = cms.bool(False)
-                                      )
+#if not options.isMC:
+#    process.LumiInfo = cms.EDProducer('LumiProducerFromBrilcalc',
+#                                      lumiFile = cms.string("lumiData.csv"),
+#                                      throwIfNotFound = cms.bool(False),
+#                                      doBunchByBunch = cms.bool(False)
+#                                      )
+#else:
+#    process.LumiInfo = cms.EDProducer('LumiProducerFromBrilcalc',
+#                                      lumiFile = cms.string("lumiMC.csv"),
+#                                      throwIfNotFound = cms.bool(False),
+#                                      doBunchByBunch = cms.bool(False)
+#                                      )
 if options.isFullAOD:
     if options.includeJets:
         if not options.isMC:
 	        process.analysis_step = cms.Path(
-                process.LumiInfo +
+#                process.LumiInfo +
                 process.primaryVertexAssociation +
                 process.offlineSlimmedPrimaryVertices +
                 process.packedCandsForMuons +
@@ -371,7 +371,7 @@ if options.isFullAOD:
             )
         else:
             process.analysis_step = cms.Path(
-                process.LumiInfo +
+#                process.LumiInfo +
                 process.primaryVertexAssociation +
                 process.offlineSlimmedPrimaryVertices +
                 process.packedCandsForMuons +
@@ -382,7 +382,7 @@ if options.isFullAOD:
 	    )
     else:
         process.analysis_step = cms.Path(
-            process.LumiInfo +
+#            process.LumiInfo +
             process.primaryVertexAssociation +
             process.offlineSlimmedPrimaryVertices +
             process.packedCandsForMuons +
@@ -394,7 +394,7 @@ else:
     if options.includeJets:
         if not options.isMC:
             process.analysis_step = cms.Path(
-                process.LumiInfo+
+#                process.LumiInfo+
                 process.muonL1Info +
                 process.muonL1InfoByQ +
                 process.ak4PFCHSL1FastL2L3ResidualCorrectorChain +
@@ -402,7 +402,7 @@ else:
             )
         else:
             process.analysis_step = cms.Path(
-                process.LumiInfo+
+#                process.LumiInfo+
                 process.muonL1Info +
                 process.muonL1InfoByQ +
                 process.ak4PFCHSL1FastL2L3CorrectorChain +
@@ -410,7 +410,7 @@ else:
             )
     else:
         process.analysis_step = cms.Path(
-            process.LumiInfo+
+#            process.LumiInfo+
             process.muonL1Info +
             process.muonL1InfoByQ +
             process.muSequence

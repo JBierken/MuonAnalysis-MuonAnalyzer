@@ -34,6 +34,11 @@ def muonAnalysis_customizeFullAOD_JPsi(process):
    process.muSequence = cms.Sequence(process.fullAODSequence)
    return process
 
+def muonAnalysis_customizeStandAloneFullAOD_JPsi(process):
+   process.load("MuonAnalysis.MuonAnalyzer.StandAlone_fullAOD_JPsi_cff")
+   process.muSequence = cms.Sequence(process.fullAODSequence)
+   return process
+
 def muonAnalysis_customizeMiniAOD_Z(process):
    process.load("MuonAnalysis.MuonAnalyzer.miniAOD_Z_cff")
    process.muSequence = cms.Sequence(process.miniAODSequence)
@@ -44,7 +49,12 @@ def muonAnalysis_customizeStandAloneMiniAOD_Z(process):
    process.muSequence = cms.Sequence(process.miniAODSequence)
    return process
 
-def muonAnalysis_customizeMiniAOD(process):
+def muonAnalysis_customizeMiniAOD_JPsi(process):
    process.load("MuonAnalysis.MuonAnalyzer.miniAOD_JPsi_cff")
+   process.muSequence = cms.Sequence(process.miniAODSequence)
+   return process
+
+def muonAnalysis_customizeStandAloneMiniAOD_JPsi(process):
+   process.load("MuonAnalysis.MuonAnalyzer.StandAlone_miniAOD_JPsi_cff")
    process.muSequence = cms.Sequence(process.miniAODSequence)
    return process

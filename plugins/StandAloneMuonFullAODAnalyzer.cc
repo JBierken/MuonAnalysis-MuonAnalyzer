@@ -319,7 +319,8 @@ StandAloneMuonFullAODAnalyzer::StandAloneMuonFullAODAnalyzer(const edm::Paramete
   saveStandAloneTree_(iConfig.getParameter<bool>("saveStandAloneTree")),
   saveTnPTree_(iConfig.getParameter<bool>("saveTnPTree")),
   debug_(iConfig.getParameter<int>("debug")),
-  propSetup1_(iConfig, consumesCollector()) {
+  propSetup1_(iConfig, consumesCollector()) 
+{
   edm::ConsumesCollector iC = consumesCollector();
   magfieldToken_ = iC.esConsumes<MagneticField, IdealMagneticFieldRecord>();
   if (probeSelectorNames_.size() != probeSelectorBits_.size()) {
@@ -500,7 +501,9 @@ void StandAloneMuonFullAODAnalyzer::StandAlone_embedTriggerMatching(const reco::
   return;
   
 }
-//
+
+// ------------ method called for each event  ------------
+
 void StandAloneMuonFullAODAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace std;
   using namespace edm;
@@ -806,7 +809,7 @@ void StandAloneMuonFullAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
           continue;
    if (muonOnly_ && !probeMuonSelection_(tmp_mu))
       continue;
-    const reco::Track mu = *tmp_mu.standAloneMuon();
+    const reco::Track mu = *tmp_mu.standAloneMuon(); //construct tracks from SA Muons
     float minDR = 1000;
     unsigned int idx_trk;
    // if (debug_ > 0)
@@ -951,6 +954,7 @@ void StandAloneMuonFullAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     trk_SAmuon_map.second.push_back(&mu - &muons->at(0));             //stora indice muone
   
       //std::cout << " Saved a matching in the map! " << std::endl;
+      //D
       //std::cout << " muon index " << &mu - &muons->at(0) << std::endl;
       //std::cout << " track index: " <<  idx_trk << std::endl;
 
@@ -1255,6 +1259,7 @@ void StandAloneMuonFullAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     }
   }
 
+   //--------------------------------------------------------------------------
    // Muon collection for jet cleaning
    std::vector<reco::Muon> muForJetCleaning;
    for (const auto& mu : *muons) {
