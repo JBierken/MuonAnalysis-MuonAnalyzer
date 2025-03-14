@@ -228,7 +228,8 @@ def main():
         elif storageSite == 'CERN': # default option
             # Requires write access to Muon POG EOS space at CERN
             config.Site.storageSite = 'T2_CH_CERN'
-            config.Data.outLFNDirBase = '/store/group/phys_tracking/%s/FinalJetscrab_AOD_Run2022_pTFromTracker/%s/%s/%s/%s' % (getUsername(), particle, resonance, era, dataTier)
+            ite.ignoreGlobalBlacklist = True
+
         elif storageSite == 'CERNBOX':
             # See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_send_CRAB_output_to_CERNBO
             config.Site.storageSite = 'T3_CH_CERNBOX'
@@ -236,7 +237,7 @@ def main():
         elif storageSite == 'BARI':
             config.Site.storageSite = 'T2_IT_Bari'
             config.Data.outLFNDirBase = '/store/user/%s/TnP_ntuples/%s/%s/%s/%s' % (getUsername(), particle, resonance, era, dataTier)
-
+        
         config.Site.ignoreGlobalBlacklist = True
         #config.Data.ignoreLocality = True
         #config.Site.whitelist = ['T2_BR_SPRACE','T2_CH_CSCS','T2_CH_CERN','T2_IT_Rome','T2_IT_Legnaro','T2_IT_Pisa','T2_DE_RWTH','T2_FR_GRIF_IRFU','T2_RU_JINR', 'T2_IT_Bari','T2_KR_KISTI','T2_FI_HIP','T1_FR_CCIN2P3','T2_BE_IIHE'] #useful for 2018_UL AOD Run2018B
@@ -250,7 +251,9 @@ def main():
             else:
                 sample_db = options.eraDB
         else:
-            sample_db = os.path.join(os.environ['CMSSW_BASE'], "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
+            #sample_db = os.path.join(os.environ['CMSSW_BASE'], "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
+            CMSSW = '/user/jbierken/CMSSW_13_0_13'
+            sample_db = os.path.join(CMSSW, "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
 
         with open(sample_db, 'r') as db_file:
 

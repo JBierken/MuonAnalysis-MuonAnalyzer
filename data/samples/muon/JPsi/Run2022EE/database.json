@@ -10,15 +10,15 @@
             },
             "Run2022E": {
                 "dataset": "/Muon/Run2022E-22Sep2023-v1/MINIAOD",
-                "globalTag": "124X_dataRun3_v15"
+                "globalTag": "130X_dataRun3_v2"
             },
             "Run2022F": {
-                "dataset": "/Muon/Run2022F-PromptReco-v1/MINIAOD",
-                "globalTag": "124X_dataRun3_Prompt_v4"
+                "dataset": "/Muon/Run2022F-22Sep2023-v2/MINIAOD", 
+                "globalTag":  "130X_dataRun3_PromptAnalysis_v1"
             },
             "Run2022G": {
-                "dataset": "/Muon/Run2022G-PromptReco-v1/MINIAOD",
-                "globalTag": "124X_dataRun3_Prompt_v4"
+                "dataset": "/Muon/Run2022G-22Sep2023-v1/MINIAOD",
+                "globalTag": "130X_dataRun3_PromptAnalysis_v1"
             }
         },
         "AOD": {

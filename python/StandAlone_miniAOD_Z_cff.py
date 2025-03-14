@@ -60,6 +60,7 @@ muon = cms.EDAnalyzer('StandAloneMuonMiniAODAnalyzer',
            genRecoDrMatch           = cms.double(0.03),
            saveStandAloneTree       = cms.bool(True),
            saveTnPTree              = cms.bool(True),          
+           Zresonance               = cms.bool(True),
            debug                    = cms.int32(1),
            #propM1 = cms.PSet(
            useStation2              = cms.bool(False),
