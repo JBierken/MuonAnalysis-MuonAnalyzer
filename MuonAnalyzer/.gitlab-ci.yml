@@ -1,0 +1,67 @@
+variables:
+  CMSSW_RELEASE: CMSSW_10_6_4_patch1
+  CMSSW_SCRAM_ARCH: slc7_amd64_gcc820
+  SSH_SERVER_HOSTKEYS: lxplus ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTA/5AzXgbkSapknIPDoEePTM1PzIBSiyDnpZihdDXKzm8UdXxCDJLUVjBwc1JfBjnaXPEeBKZDuozDss/m98m5qQu+s2Dks000V8cUFTU+BFotzRWX0jWSBpmzse0477b40X2XCPqX0Cqfx9yHdkuMlyF0kJRxXgsGTcwzwbmvqNHJdHHYJJz93hGpBhYMREcDN5VOxXz6Ack3X7xfF29xaC91oOAqq75O11LXF5Y4kAeN9kDG8o6Zsqk4c5at5aqWqzZfnnVtGjhkgU2Mt5aKwptaFMe0Z3ys/zZM4SnsE9NfompnnWsiKk2y09UvrbzuYPWLt43Fp3+IFqRJvBX
+
+image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+
+before_script:
+  - "yum install -y openssl"
+  - source /cvmfs/grid.cern.ch/etc/profile.d/setup-cvmfs-ui.sh
+  - source /cvmfs/cms.cern.ch/cmsset_default.sh
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.cern.ch/cms-muonPOG/muonpog-integration.git ~/muonpog-integration
+  - export PATH=${PATH}:~/muonpog-integration/scripts
+
+
+build-master:
+    tags: [ cvmfs,docker ]
+    stage: build
+    only:
+        - master
+    script:
+        - cd ..
+        - source ci_setup_cmssw.sh
+        - mkdir -p MuonAnalysis/MuonAnalyzer
+        - cp -a $CI_PROJECT_DIR/* MuonAnalysis/MuonAnalyzer/
+        - scram b -j 5
+        - ci_tar_cmssw.sh
+    artifacts:
+        when: on_success
+        expire_in: 1 days
+        paths: 
+            - build.tar.gz
+
+build-mr:
+    tags: [ cvmfs,docker ]
+    stage: build
+    only:
+        - merge_requests
+    script:
+        - cd ..
+        - source ci_setup_cmssw.sh
+        - mkdir -p MuonAnalysis/MuonAnalyzer
+        - cp -a $CI_PROJECT_DIR/* MuonAnalysis/MuonAnalyzer/
+        - scram b -j 5
+        - ci_tar_cmssw.sh
+    artifacts:
+        when: on_success
+        expire_in: 1 days
+        paths: 
+            - build.tar.gz
+
+test-code:
+    tags: [ cvmfs ] 
+    stage: test-simple
+    only:
+        - merge_requests
+    script:
+        - if [ -z "$CMS_SERVICE_USER" ]; then echo "No user defined, skipping tests"; exit 0; fi
+        - source ci_untar_cmssw.sh
+        - ci_kinit.sh
+        - scp ${CMS_SERVICE_USER}@lxplus:/eos/cms/store/group/phys_muon/MuonPOGIntegration/rootfiles/UL18/events_MINIAOD_SingleMuon_numEvent100.root .
+        - cmsRun MuonAnalysis/MuonAnalyzer/test/run_muonAnalyzer_cfg.py inputFiles=file:events_MINIAOD_SingleMuon_numEvent100.root globalTag=106X_dataRun2_v28 maxEvents=-1 isMC=0 isFullAOD=0 outputFile=output.root
+
+
+stages:
+  - build
+  - test-simple
