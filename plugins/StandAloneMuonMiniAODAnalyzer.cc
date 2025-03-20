@@ -99,6 +99,7 @@ Description: Ntuplizer for miniAOD files
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/CSCGeometry/interface/CSCGeometry.h"
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 #include "DataFormats/Luminosity/interface/LumiInfo.h"
@@ -173,6 +174,7 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
         edm::EDGetTokenT<edm::View<reco::Muon>>                           muonsViewToken_;
         edm::EDGetToken                                                   PFCands_;
         edm::EDGetToken                                                   LostTracks_;
+        edm::EDGetToken                                                   tracksToken_;
         const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord>    bFieldToken_;
         edm::EDGetToken                                                   SAmuonsToken_;
 
@@ -216,6 +218,8 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
         const double                                                      maxpt_relative_dif_trk_SAmu_;
         const double                                                      maxdr_trk_SAmu_;
         const double                                                      maxdr_trk_dsa_;
+        const double                                                      maxeta_trk_mu_;
+        const double                                                      maxeta_trk_SAmu_;
         const unsigned                                                    momPdgId_;
         const double                                                      genRecoDrMatch_;
         const bool                                                        saveStandAloneTree_;
@@ -265,6 +269,7 @@ StandAloneMuonMiniAODAnalyzer::StandAloneMuonMiniAODAnalyzer(const edm::Paramete
         muonsViewToken_(consumes<edm::View<reco::Muon>>(iConfig.getParameter<edm::InputTag>("muons"))),
         PFCands_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("PFCands"))),
         LostTracks_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("lostTracks"))),
+        tracksToken_(consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("tracks"))),
         bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
         SAmuonsToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("SAmuons"))),
 
@@ -307,6 +312,8 @@ StandAloneMuonMiniAODAnalyzer::StandAloneMuonMiniAODAnalyzer(const edm::Paramete
         maxpt_relative_dif_trk_SAmu_(iConfig.getParameter<double>("maxRelPtProbeTrkSAMuon")),
         maxdr_trk_SAmu_(iConfig.getParameter<double>("maxDRProbeTrkSAMuon")),
         maxdr_trk_dsa_(iConfig.getParameter<double>("maxDRProbeTrkDSA")),
+        maxeta_trk_mu_(iConfig.getParameter<double>("maxEtaProbeTrkMuon")),
+        maxeta_trk_SAmu_(iConfig.getParameter<double>("maxEtaProbeTrkSAMuon")),
         momPdgId_(iConfig.getParameter<unsigned>("momPdgId")),
         genRecoDrMatch_(iConfig.getParameter<double>("genRecoDrMatch")),
         saveStandAloneTree_(iConfig.getParameter<bool>("saveStandAloneTree")),
@@ -512,19 +519,19 @@ void StandAloneMuonMiniAODAnalyzer::StandAlone_embedTriggerMatching(const edm::E
         }
         if (isTag) 
         {
-            StandAlone_nt.tag_trg[&trg - &Triggers[0]]          = matched;
-            StandAlone_nt.tag_trg_pt[&trg - &Triggers[0]]       = matched_pt;
-            StandAlone_nt.tag_trg_eta[&trg - &Triggers[0]]      = matched_eta;
-            StandAlone_nt.tag_trg_phi[&trg - &Triggers[0]]      = matched_phi;
-            StandAlone_nt.tag_trg_dr[&trg - &Triggers[0]]       = matched_dr;
+            StandAlone_nt.tag_trg[&trg          - &Triggers[0]] = matched;
+            StandAlone_nt.tag_trg_pt[&trg       - &Triggers[0]] = matched_pt;
+            StandAlone_nt.tag_trg_eta[&trg      - &Triggers[0]] = matched_eta;
+            StandAlone_nt.tag_trg_phi[&trg      - &Triggers[0]] = matched_phi;
+            StandAlone_nt.tag_trg_dr[&trg       - &Triggers[0]] = matched_dr;
         }
         else 
         {
-            StandAlone_nt.probe_trg[&trg - &Triggers[0]]        = matched;
-            StandAlone_nt.probe_trg_pt[&trg - &Triggers[0]]     = matched_pt;
-            StandAlone_nt.probe_trg_eta[&trg - &Triggers[0]]    = matched_eta;
-            StandAlone_nt.probe_trg_phi[&trg - &Triggers[0]]    = matched_phi;
-            StandAlone_nt.probe_trg_dr[&trg - &Triggers[0]]     = matched_dr;
+            StandAlone_nt.probe_trg[&trg        - &Triggers[0]] = matched;
+            StandAlone_nt.probe_trg_pt[&trg     - &Triggers[0]] = matched_pt;
+            StandAlone_nt.probe_trg_eta[&trg    - &Triggers[0]] = matched_eta;
+            StandAlone_nt.probe_trg_phi[&trg    - &Triggers[0]] = matched_phi;
+            StandAlone_nt.probe_trg_dr[&trg     - &Triggers[0]] = matched_dr;
         }
     }
     return;
@@ -558,9 +565,12 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     iEvent.getByToken(muonsViewToken_, muonsView);
     edm::Handle<std::vector<pat::PackedCandidate>>      lostTracks;
     iEvent.getByToken(LostTracks_, lostTracks);
+    edm::Handle<std::vector<reco::Track>>               tracks_;
+    iEvent.getByToken(tracksToken_, tracks_);
     //edm::ESHandle<MagneticField> bField;
     //iSetup.get<IdealMagneticFieldRecord>().get(bField);
-    edm::ESHandle<MagneticField> bField;
+    edm::ESHandle<MagneticField>                        bField;
+    //iEvent.getByToken(bFieldToken_, bField);
     bField = iSetup.getHandle(bFieldToken_);
 
     //const auto& bField = iSetup.getData(bFieldToken_);
@@ -789,8 +799,8 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                     && (abs(trk.eta()) <= 1. || trk.p() <= 2.))continue;
             if (fabs(mu.vz() - trk.vz()) > maxdz_trk_mu_ 
                     && maxdz_trk_mu_ > 0)               continue;
-            // if (fabs(mu.eta() - trk.eta()) > 0.4)    continue;
-            if (fabs(mu.eta() - trk.eta()) > 0.3)       continue;
+            //if (fabs(mu.eta() - trk.eta()) > 0.3)       continue;
+            if (fabs(mu.eta() - trk.eta()) > maxeta_trk_mu_) continue;
             if (fabs(mu.pt() - trk.pt()) / mu.pt() > maxpt_relative_dif_trk_mu_ 
                     && maxpt_relative_dif_trk_mu_ > 0)  continue;
 
@@ -856,7 +866,8 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                     && (abs(trk.eta()) <= 1. || trk.p() <= 2.))     continue;
             if (fabs(mu.vz() - trk.vz()) >= maxdz_trk_SAmu_ 
                     && maxdz_trk_SAmu_ > 0)                         continue;
-            if (fabs(mu.eta() - trk.eta()) > 0.3)                   continue;
+            //if (fabs(mu.eta() - trk.eta()) > 0.3)                   continue;
+            if (fabs(mu.eta() - trk.eta()) > maxeta_trk_SAmu_)      continue;
             if (fabs(mu.pt() - trk.pt()) / trk.pt() > maxpt_relative_dif_trk_SAmu_ 
                     && maxpt_relative_dif_trk_SAmu_)                continue;
 
@@ -901,9 +912,9 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
 
     if (debug_ > 0) 
     {
-        std::cout << std::endl << "NEW EVENT"   << std::endl            << std::endl;
-        std::cout << "New Evt "                 << nt.event             << std::endl;
-        std::cout << "Run "                     << nt.run               << std::endl;
+        std::cout << std::endl << "NEW EVENT"   << std::endl                << std::endl;
+        std::cout << "New Evt "                 << nt.event                 << std::endl;
+        std::cout << "Run "                     << nt.run                   << std::endl;
         std::cout << "Total of tag muons: "     << tag_muon_ttrack.size()   << std::endl;
     }
 
@@ -934,7 +945,8 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
         bool isZmass                                        = false;
         bool isJPsimass                                     = false;
 
-        for (const auto& trk : tracks) 
+        for (const reco::Track& trk : *tracks_)
+        //for (const auto& trk : tracks_) 
         {
             isZmass                                         = false;
             isJPsimass                                      = false;
@@ -955,15 +967,16 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                 float mass_tagtrack                                 = DimuonMass(tag.first.pt(), tag.first.eta(), tag.first.phi(), trk.pt(), trk.eta(), trk.phi());
                 idx_tag_temp                                        = &tag - &tag_muon_ttrack[0];
 
-                if (mass_tagtrack >= 40     && mass_tagtrack <= 200 && idx_tag_temp == idx_tag_assoc) { isZmass     = true; break; }
-                if (mass_tagtrack >= 1.5    && mass_tagtrack <= 6.  && idx_tag_temp == idx_tag_assoc) { isJPsimass  = true; break; }
+                if (mass_tagtrack >= 40     && mass_tagtrack <= 200 && idx_tag_temp == idx_tag_assoc) {     isZmass     = true; break; }
+                if (mass_tagtrack >= 2.85   && mass_tagtrack <= 3.25  && idx_tag_temp == idx_tag_assoc) {   isJPsimass  = true; break; }
             }
 
             bool charge_match                                       = trk_mu.charge() == trk.charge();
             bool pt_match                                           = ((fabs(trk_mu.pt() - trk.pt())/trk.pt() < maxpt_relative_dif_trk_SAmu_)
                                                                         && (maxpt_relative_dif_trk_SAmu_ > 0));
             bool DeltaR_match                                       = deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi()) < maxdr_trk_SAmu_;
-            bool DeltaEta_match                                     = fabs(trk_mu.eta() - trk.eta()) < 0.3;
+            //bool DeltaEta_match                                     = fabs(trk_mu.eta() - trk.eta()) < 0.15;
+            bool DeltaEta_match                                     = fabs(trk_mu.eta() - trk.eta()) < maxeta_trk_SAmu_;
 
             // Fill map for fakerate study
             if(charge_match 
@@ -1036,7 +1049,7 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
             if((trk.pt() <= minpt_trkSA_) 
                     && (abs(trk.eta()) <= 1. || trk.p() <= 2.))     continue;
             if(!isAssoc)                                            continue;
-            if(fabs(SA_mu.eta() - trk.eta()) > 0.3)                 continue;
+            if(fabs(SA_mu.eta() - trk.eta()) > maxeta_trk_SAmu_ )   continue;
             if(fabs(SA_mu.pt() - trk.pt()) / trk.pt() > maxpt_relative_dif_trk_SAmu_ 
                     && maxpt_relative_dif_trk_SAmu_ > 0)            continue;
             float DR                                                = deltaR(SA_mu.eta(), SA_mu.phi(), trk.eta(), trk.phi());

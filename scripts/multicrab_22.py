@@ -251,9 +251,9 @@ def main():
             else:
                 sample_db = options.eraDB
         else:
-            #sample_db = os.path.join(os.environ['CMSSW_BASE'], "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
-            CMSSW = '/user/jbierken/CMSSW_13_0_13'
-            sample_db = os.path.join(CMSSW, "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
+            sample_db = os.path.join(os.environ['CMSSW_BASE'], "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
+            #CMSSW = '/user/jbierken/CMSSW_13_0_13'
+            #sample_db = os.path.join(CMSSW, "src/MuonAnalysis/MuonAnalyzer/data/samples", particle, resonance, era, "database.json")
 
         with open(sample_db, 'r') as db_file:
 
