@@ -78,9 +78,8 @@ Description: Ntuplizer for miniAOD files
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateIsolation.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
-#include "KlFitter.h"
-#include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/ParametrizedEngine/src/OAEParametrizedMagneticField.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "DataFormats/MuonReco/interface/Muon.h"
@@ -97,15 +96,31 @@ Description: Ntuplizer for miniAOD files
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
 #include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/CSCGeometry/interface/CSCGeometry.h"
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 #include "DataFormats/Luminosity/interface/LumiInfo.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Utilities/interface/VecArray.h"
+#include "FWCore/Utilities/interface/isFinite.h"
+
+//#include "DQMServices/Core/interface/DQMEDAnalyzer.h"
+//#include "DQMServices/Core/interface/DQMStore.h"
+
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackBase.h"
+#include "DataFormats/Math/interface/libminifloat.h"
+#include "DataFormats/Math/interface/liblogintpack.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
+
 //#include "MuonBranches.h"
+//#include "MuonAnalysis/MuonAnalyzer/interface/StandAloneMuonMiniAODAnalyzer.h"
+#include "KlFitter.h"
 #include "MuonGenAnalyzer.h"
 #include "NtupleContent.h"
 #include "TTree.h"
@@ -125,7 +140,6 @@ using namespace std;
 //
 // class declaration
 //
-
 // If the analyzer does not use TFileService, please remove
 // the template argument to the base class so the class inherits
 // from  edm::one::EDAnalyzer<> and also remove the line from
@@ -174,7 +188,7 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
         edm::EDGetTokenT<edm::View<reco::Muon>>                           muonsViewToken_;
         edm::EDGetToken                                                   PFCands_;
         edm::EDGetToken                                                   LostTracks_;
-        edm::EDGetToken                                                   tracksToken_;
+        //edm::EDGetToken                                                   tracksToken_;
         const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord>    bFieldToken_;
         edm::EDGetToken                                                   SAmuonsToken_;
 
@@ -243,7 +257,6 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
 
         // ----------member data ---------------------------
 };
-
 //
 // constants, enums and typedefs
 //
@@ -269,7 +282,7 @@ StandAloneMuonMiniAODAnalyzer::StandAloneMuonMiniAODAnalyzer(const edm::Paramete
         muonsViewToken_(consumes<edm::View<reco::Muon>>(iConfig.getParameter<edm::InputTag>("muons"))),
         PFCands_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("PFCands"))),
         LostTracks_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("lostTracks"))),
-        tracksToken_(consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("tracks"))),
+        //tracksToken_(consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("tracks"))),
         bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
         SAmuonsToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("SAmuons"))),
 
@@ -394,7 +407,7 @@ void StandAloneMuonMiniAODAnalyzer::embedTriggerMatching(const edm::Event&      
         {
             trigobj.unpackNamesAndLabels(iEvent,    *trigResults);
             float dR_tmp                            = deltaR(mu.eta(), mu.phi(), trigobj.eta(), trigobj.phi());
-            float dptrel_tmp                        = fabs(mu.pt()-trigobj.pt())/(trigobj.pt());
+            //float dptrel_tmp                        = fabs(mu.pt()-trigobj.pt())/(trigobj.pt());
             // check path names
             if (trg_tstr.Contains("HLT_")) 
             {
@@ -565,8 +578,8 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     iEvent.getByToken(muonsViewToken_, muonsView);
     edm::Handle<std::vector<pat::PackedCandidate>>      lostTracks;
     iEvent.getByToken(LostTracks_, lostTracks);
-    edm::Handle<std::vector<reco::Track>>               tracks_;
-    iEvent.getByToken(tracksToken_, tracks_);
+    //edm::Handle<std::vector<reco::Track>>               tracks_;
+    //iEvent.getByToken(tracksToken_, tracks_);
     //edm::ESHandle<MagneticField> bField;
     //iSetup.get<IdealMagneticFieldRecord>().get(bField);
     edm::ESHandle<MagneticField>                        bField;
@@ -664,9 +677,9 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     for (const reco::Vertex& vtx : *vertices) 
     {
         if ((vtx.isFake() || !vtx.isValid()) 
-                || (vtx.ndof() <= 4) 
-                || abs(vtx.z()) > 25 
-                || ((vtx.position()).Rho() > 2 ))       continue;
+            || (vtx.ndof() <= 4) 
+            || abs(vtx.z()) > 25 
+            || ((vtx.position()).Rho() > 2 ))           continue;
 
         nt.pv_x                                         = vtx.x();
         nt.pv_y                                         = vtx.y();
@@ -748,6 +761,7 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     // Add Lost Tracks to Packed cands
     //      --> added nocuts tracks vector for matching to SA muons
     std::vector<reco::Track>                            tracks;
+    std::vector<pat::PackedCandidate>                   PFtracks;
     std::vector<reco::Track>                            nocut_tracks;
     for (const auto& container : {pfcands, lostTracks}) 
     {
@@ -755,9 +769,11 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
         {
             if (!trk.hasTrackDetails())                 continue;
             nocut_tracks.push_back(*trk.bestTrack());
+            
             if (!probeSelection_(trk))                  continue;
             if (HighPurity_ && !trk.trackHighPurity())  continue;
             tracks.emplace_back(*trk.bestTrack());
+            PFtracks.emplace_back(trk);
         }
     }
     
@@ -944,13 +960,16 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
         bool isAssoc                                        = false;
         bool isZmass                                        = false;
         bool isJPsimass                                     = false;
+        unsigned int                                        PFtracks_idx = 0;
 
-        for (const reco::Track& trk : *tracks_)
-        //for (const auto& trk : tracks_) 
+        //for (const reco::Track& trk : *tracks_)
+        for (const auto& trk : tracks) 
         {
             isZmass                                         = false;
             isJPsimass                                      = false;
             isAssoc                                         = false;
+
+            PFtracks_idx++;
 
             // calculate tag-track associations
             if((trk.pt() <= minpt_trkSA_) 
@@ -991,7 +1010,7 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                 {
                     minDR_assoc                                     = deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi());
                 }
-                
+                /*
                 bool isTrackerOnlyseeded                            = (trk.isAlgoInMask(trk.initialStep) 
                                                                        || trk.isAlgoInMask(trk.lowPtTripletStep) 
                                                                        || trk.isAlgoInMask(trk.pixelPairStep) 
@@ -1004,7 +1023,19 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                                                                        || trk.isAlgoInMask(trk.highPtTripletStep) 
                                                                        || trk.isAlgoInMask(trk.detachedQuadStep)
                                                                     );
-                
+                */
+                auto algo                                           = trk.originalAlgo(); 
+                //auto algo                                           = trk.algo(); 
+                if (debug_ > 0)                                     std::cout << "track seeding: "     <<  algo << std::endl;
+                bool isTrackerOnlyseeded                            = ((algo == 4)                                  // initialstep
+                                                                        || (algo == 5)                              // lowPtTripletStep 
+                                                                        || (algo == 6)                              // PixelPairStep
+                                                                        || (algo == 7)                              // detechedTripletStep
+                                                                        || (algo == 8)                              // mixedTripletStep
+                                                                        || (algo == 9)                              // pixelLessStep
+                                                                        || (algo == 10)                             // tobTecStep
+                                                                        || (algo == 11)                             // jetCoreRegionalStep
+                                                                    ); 
                 if(!isTrackerOnlyseeded && isOnlySeeded_)           continue;
                 
                 if(minDR_assoc >= deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi()))
@@ -1031,20 +1062,48 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
             // Fill map for main standAloneMuon study
             if (SA_mu.charge() != trk.charge())                     continue;
             
-            bool isTrackeronlyseeded                                = (trk.isAlgoInMask(trk.initialStep) 
-                                                                       || trk.isAlgoInMask(trk.lowPtTripletStep) 
-                                                                       || trk.isAlgoInMask(trk.pixelPairStep) 
-                                                                       || trk.isAlgoInMask(trk.detachedTripletStep) 
-                                                                       || trk.isAlgoInMask(trk.mixedTripletStep) 
-                                                                       || trk.isAlgoInMask(trk.pixelLessStep) 
-                                                                       || trk.isAlgoInMask(trk.tobTecStep) 
-                                                                       || trk.isAlgoInMask(trk.jetCoreRegionalStep) 
-                                                                       || trk.isAlgoInMask(trk.lowPtQuadStep) 
-                                                                       || trk.isAlgoInMask(trk.highPtTripletStep) 
-                                                                       || trk.isAlgoInMask(trk.detachedQuadStep)
-                                                                    );
-            
-            if(!isTrackeronlyseeded && isOnlySeeded_)               continue;
+            /*
+            bool isTrackerOnlyseeded                            = (trk.isAlgoInMask(trk.initialStep) 
+                                                                    || trk.isAlgoInMask(trk.lowPtTripletStep) 
+                                                                    || trk.isAlgoInMask(trk.pixelPairStep) 
+                                                                    || trk.isAlgoInMask(trk.detachedTripletStep) 
+                                                                    || trk.isAlgoInMask(trk.mixedTripletStep) 
+                                                                    || trk.isAlgoInMask(trk.pixelLessStep) 
+                                                                    || trk.isAlgoInMask(trk.tobTecStep) 
+                                                                    || trk.isAlgoInMask(trk.jetCoreRegionalStep) 
+                                                                    || trk.isAlgoInMask(trk.lowPtQuadStep) 
+                                                                    || trk.isAlgoInMask(trk.highPtTripletStep) 
+                                                                    || trk.isAlgoInMask(trk.detachedQuadStep)
+                                                                );
+            */
+            auto algo                                           = trk.originalAlgo(); 
+            //auto algo                                           = trk.algo(); 
+            if (debug_ > 0)                                     std::cout << "track seeding: "     <<  algo << std::endl;
+            bool isTrackerOnlyseeded                            = ((algo == 4)                                  // initialstep
+                                                                    || (algo == 5)                              // lowPtTripletStep 
+                                                                    || (algo == 6)                              // PixelPairStep
+                                                                    || (algo == 7)                              // detechedTripletStep
+                                                                    || (algo == 8)                              // mixedTripletStep
+                                                                    || (algo == 9)                              // pixelLessStep
+                                                                    || (algo == 10)                             // tobTecStep
+                                                                    || (algo == 11)                             // jetCoreRegionalStep
+                                                                );
+                                                                     
+            /*    
+            bool isTrackerOnlyseeded                            = ((algo == reco::TrackBase::initialStep)
+                                                                    || (algo == reco::TrackBase::lowPtTripletStep) 
+                                                                    || (algo == reco::TrackBase::pixelPairStep) 
+                                                                    || (algo == reco::TrackBase::detachedTripletStep) 
+                                                                    || (algo == reco::TrackBase::mixedTripletStep) 
+                                                                    || (algo == reco::TrackBase::pixelLessStep) 
+                                                                    || (algo == reco::TrackBase::tobTecStep) 
+                                                                    || (algo == reco::TrackBase::jetCoreRegionalStep) 
+                                                                    || (algo == reco::TrackBase::lowPtQuadStep) 
+                                                                    || (algo == reco::TrackBase::highPtTripletStep) 
+                                                                    || (algo == reco::TrackBase::detachedQuadStep)
+                                                                );
+            */
+            if(!isTrackerOnlyseeded && isOnlySeeded_)               continue;
             
             if((trk.pt() <= minpt_trkSA_) 
                     && (abs(trk.eta()) <= 1. || trk.p() <= 2.))     continue;
@@ -1358,7 +1417,6 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
                 if (tag.first.charge() == probe.charge())                       continue;
 
                 // Add pt condition to take allTracks pT instead of StandAloneMuon
-
                 float mass                                                      = DimuonMass(   tag.first.pt(), 
                                                                                                 tag.first.eta(), 
                                                                                                 tag.first.phi(), 

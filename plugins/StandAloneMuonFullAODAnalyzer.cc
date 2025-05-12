@@ -83,7 +83,6 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
-#include "MagneticField/ParametrizedEngine/src/OAEParametrizedMagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "TLorentzVector.h"
@@ -909,8 +908,18 @@ void StandAloneMuonFullAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
        if(minDR_assoc >= deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi())){
          minDR_assoc = deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi());
        }
-       bool isTrackerOnlyseeded = trk.isAlgoInMask(trk.initialStep) || trk.isAlgoInMask(trk.lowPtTripletStep) || trk.isAlgoInMask(trk.pixelPairStep) || trk.isAlgoInMask(trk.detachedTripletStep) ||
-        trk.isAlgoInMask(trk.mixedTripletStep) || trk.isAlgoInMask(trk.pixelLessStep) || trk.isAlgoInMask(trk.tobTecStep) || trk.isAlgoInMask(trk.jetCoreRegionalStep) || trk.isAlgoInMask(trk.lowPtQuadStep) || trk.isAlgoInMask(trk.highPtTripletStep) || trk.isAlgoInMask(trk.detachedQuadStep);
+       bool isTrackerOnlyseeded     = (trk.isAlgoInMask(trk.initialStep) 
+                                        || trk.isAlgoInMask(trk.lowPtTripletStep) 
+                                        || trk.isAlgoInMask(trk.pixelPairStep) 
+                                        || trk.isAlgoInMask(trk.detachedTripletStep) 
+                                        || trk.isAlgoInMask(trk.mixedTripletStep) 
+                                        || trk.isAlgoInMask(trk.pixelLessStep) 
+                                        || trk.isAlgoInMask(trk.tobTecStep) 
+                                        || trk.isAlgoInMask(trk.jetCoreRegionalStep) 
+                                        || trk.isAlgoInMask(trk.lowPtQuadStep) 
+                                        || trk.isAlgoInMask(trk.highPtTripletStep) 
+                                        || trk.isAlgoInMask(trk.detachedQuadStep)
+                                    );
          if(!isTrackerOnlyseeded && isOnlySeeded_)
            continue;
          if(minDR_assoc >= deltaR(trk_mu.eta(), trk_mu.phi(), trk.eta(), trk.phi())){

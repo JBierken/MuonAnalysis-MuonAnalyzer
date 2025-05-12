@@ -9,19 +9,19 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('resonance', 'Z',
+options.register('resonance', 'JPsi',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Set resonance ('Z'/'JPsi')"
 )
 
-options.register('isFullAOD', True,
+options.register('isFullAOD', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Set to False for MiniAOD datatier"
 )
 
-options.register('isMC',False,
+options.register('isMC',True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Set to True for MC"
@@ -195,6 +195,11 @@ if len(options.inputFiles) == 0:
                 options.inputFiles.append('/store/mc/RunIIAutumn18DRPremix/JpsiToMuMu_JpsiPt8_TuneCP5_13TeV-pythia8/AODSIM/102X_upgrade2018_realistic_v15-v1/270001/FFF2FC1D-18CB-7244-9663-4E36963494B7.root')
             else:
                 options.inputFiles.append('/store/data/Run2018A/Charmonium/AOD/17Sep2018-v1/100001/07679496-4DEF-1B44-BA04-768765A80599.root')
+        else:
+            if options.isMC:
+                options.inputFiles.append('/store/mc/Run3Summer22MiniAODv3/JpsiTo2Mu_JpsiPt8_TuneCP5_13p6TeV_pythia8/MINIAODSIM/MUO_POG_124X_mcRun3_2022_realistic_v12-v2/2810000/000538a8-88b3-414c-8f22-db78d99e356e.root')
+            else:
+                options.inputFiles.append('/store/data/Run2022B/SingleMuon/MINIAOD/22Sep2023-v1/2520000/843a8942-c6ba-43ee-a15f-36df28833106.root')
 
 
 if options.outputFile=="":
