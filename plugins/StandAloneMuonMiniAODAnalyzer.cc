@@ -78,7 +78,6 @@ Description: Ntuplizer for miniAOD files
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateIsolation.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
-#include "MagneticField/ParametrizedEngine/src/OAEParametrizedMagneticField.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
@@ -189,7 +188,7 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
         edm::EDGetToken                                                   PFCands_;
         edm::EDGetToken                                                   LostTracks_;
         //edm::EDGetToken                                                   tracksToken_;
-        const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord>    bFieldToken_;
+        //const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord>    bFieldToken_;
         edm::EDGetToken                                                   SAmuonsToken_;
 
         edm::EDGetTokenT<edm::TriggerResults>                             trgresultsToken_;
@@ -203,6 +202,7 @@ class StandAloneMuonMiniAODAnalyzer : public edm::one::EDAnalyzer<edm::one::Shar
         edm::EDGetTokenT<double>                                          rhoJetsNC_;
         edm::EDGetToken                                                   jetsToken_;
         edm::EDGetToken                                                   genJetsToken_;
+        edm::ESGetToken<MagneticField, IdealMagneticFieldRecord>          bFieldToken_;
 
         std::vector<std::string>                                          HLTPaths_;                  // trigger fired
         std::vector<std::string>                                          tagFilters_;                // tag-trigger matching
@@ -283,7 +283,7 @@ StandAloneMuonMiniAODAnalyzer::StandAloneMuonMiniAODAnalyzer(const edm::Paramete
         PFCands_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("PFCands"))),
         LostTracks_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("lostTracks"))),
         //tracksToken_(consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("tracks"))),
-        bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+        //bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
         SAmuonsToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter<edm::InputTag>("SAmuons"))),
 
         trgresultsToken_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"))),
@@ -300,6 +300,7 @@ StandAloneMuonMiniAODAnalyzer::StandAloneMuonMiniAODAnalyzer(const edm::Paramete
         rhoJetsNC_(consumes<double>(iConfig.getParameter<edm::InputTag>("rhoJetsNC"))),
         jetsToken_(consumes<std::vector<pat::Jet>>(iConfig.getParameter<edm::InputTag>("jets"))),
         genJetsToken_(consumes<std::vector<reco::GenJet>>(iConfig.getParameter<edm::InputTag>("genJets"))),
+        bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
         HLTPaths_(iConfig.getParameter<std::vector<std::string>>("triggerPaths")),
         tagFilters_(iConfig.getParameter<std::vector<std::string>>("tagFilters")),
         probeFilters_(iConfig.getParameter<std::vector<std::string>>("probeFilters")),
@@ -582,11 +583,12 @@ void StandAloneMuonMiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm:
     //iEvent.getByToken(tracksToken_, tracks_);
     //edm::ESHandle<MagneticField> bField;
     //iSetup.get<IdealMagneticFieldRecord>().get(bField);
-    edm::ESHandle<MagneticField>                        bField;
+    //edm::ESHandle<MagneticField>                        bField;
     //iEvent.getByToken(bFieldToken_, bField);
-    bField = iSetup.getHandle(bFieldToken_);
-
+    //bField = iSetup.getHandle(bFieldToken_);
     //const auto& bField = iSetup.getData(bFieldToken_);
+    const MagneticField* bField = &iSetup.getData(bFieldToken_);
+    
     // mini isolation
     edm::Handle<std::vector<pat::PackedCandidate>>      pfcands;
     iEvent.getByToken(PFCands_, pfcands);

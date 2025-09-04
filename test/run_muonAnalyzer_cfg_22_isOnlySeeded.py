@@ -21,7 +21,7 @@ options.register('isFullAOD', False,
     "Set to False for MiniAOD datatier"
 )
 
-options.register('isMC',True,
+options.register('isMC',False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Set to True for MC"
